@@ -19,6 +19,7 @@ namespace MiApi.Test.Steps
         private readonly HttpClient _client;
         private HttpResponseMessage _response;
         private CategoryDto? _categoryDto;
+        private int _categoryId;
 
         public CategoriesSteps(ScenarioContext scenarioContext)
         {
@@ -41,7 +42,7 @@ namespace MiApi.Test.Steps
             {
                 Name = name,
                 Description = "Sample description",
-                ProductIds = [1]
+                ProductIds = []
             };
         }
 
@@ -52,6 +53,7 @@ namespace MiApi.Test.Steps
             {
                 Name = name
             };
+
         }
 
         [Given(@"I have data to edit a category with name ""(.*)""")]
@@ -82,19 +84,50 @@ namespace MiApi.Test.Steps
 
         }
 
+        [Given(@"I have a category with name ""(.*)"" that has products to delete")]
+        public async Task GivenIHaveCategoryWithNameThatHasProductsToDelete(string name)
+        {
+            // Crea la categoría si no existe
+            var categoryDto = new CategoryDto
+            {
+                Name = name,
+                Description = "Description for fruits",
+                ProductIds = []
+            };
+
+            var postResponse = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+            postResponse.EnsureSuccessStatusCode();
+
+            // Obtén el ID de la categoría recién creada
+            var createdCategoryContent = await postResponse.Content.ReadAsStringAsync();
+            var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+            _categoryId = createdCategory.Id; // Guarda el ID de la categoría
+
+            // Crea un producto asociado a la categoría
+            var productDto = new ProductDto
+            {
+                Name = "Apple",
+                Description = "A juicy fruit",
+                CategoryIds = new List<int> { _categoryId } // Usa el ID de la categoría recién creada
+            };
+
+            await _client.PostAsJsonAsync("/api/v1/products", productDto);
+
+        }
+
         [Given(@"I delete all products from the category name ""(.*)""")]
         public async Task GivenIDeleteAllProductsFromTheCategoryName(string categoryName)
         {
-           
-            var categoriesResponse = await _client.GetAsync("/api/v1/categories"); 
+            var categoriesResponse = await _client.GetAsync("/api/v1/categories");
             var categories = JsonConvert.DeserializeObject<List<CategoryDto>>(await categoriesResponse.Content.ReadAsStringAsync());
 
             // Buscar la categoría por nombre y obtener su ID
             var category = categories.FirstOrDefault(c => c.Name == categoryName);
 
+            // Si la categoría no se encuentra, no hay nada que eliminar
             if (category == null)
             {
-                throw new Exception($"No se encontró la categoría con nombre '{categoryName}'.");
+                throw new Exception($"Category not founded");
             }
 
             // Obtener la lista de productos
@@ -106,7 +139,8 @@ namespace MiApi.Test.Steps
             {
                 if (product.CategoryIds.Contains(category.Id))
                 {
-                    await _client.DeleteAsync($"/api/v1/products/{product.Id}");
+                    var deleteResponse = await _client.DeleteAsync($"/api/v1/products/{product.Name}"); // Cambia a usar nombre
+                    deleteResponse.EnsureSuccessStatusCode(); // Asegúrate de que la eliminación fue exitosa
                 }
             }
         }

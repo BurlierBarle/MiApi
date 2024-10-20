@@ -31,8 +31,8 @@ Scenario: User can edit category
     And The response should have updated the category in the database
 
 Scenario: User tries to edit category with empty name
-    Given I have data to edit a category with name "Fruit"
-    When I send a PUT to "/api/v1/categories/Fruit" with empty name
+    Given I have data to edit a category with name "Soda"
+    When I send a PUT to "/api/v1/categories/Soda" with empty name
     Then the response status should be 400
     And The response should get an error message that the name field is required
 
@@ -49,8 +49,8 @@ Scenario: User tries to destroy a category but it has products assigned
     And The response should get an error message that cannot delete category with assigned products.
 
 Scenario: User deletes products and then deletes the category
-    Given I have a category with name "Fruit" that has products
+    Given I have a category with name "Fruit" that has products to delete
     And I delete all products from the category name "Fruit"
     When I send a DELETE to "/api/v1/categories/Fruit"
-    Then the response status should be 404
+    Then the response status should be 204
     And The category should not exist in the database

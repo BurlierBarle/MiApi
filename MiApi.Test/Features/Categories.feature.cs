@@ -270,10 +270,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 34
-    testRunner.Given("I have data to edit a category with name \"Fruit\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to edit a category with name \"Soda\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 35
-    testRunner.When("I send a PUT to \"/api/v1/categories/Fruit\" with empty name", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a PUT to \"/api/v1/categories/Soda\" with empty name", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 36
     testRunner.Then("the response status should be 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -373,7 +373,7 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 52
-    testRunner.Given("I have a category with name \"Fruit\" that has products", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have a category with name \"Fruit\" that has products to delete", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 53
     testRunner.And("I delete all products from the category name \"Fruit\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
@@ -382,7 +382,7 @@ this.ScenarioInitialize(scenarioInfo);
     testRunner.When("I send a DELETE to \"/api/v1/categories/Fruit\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 55
-    testRunner.Then("the response status should be 404", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("the response status should be 204", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
 #line 56
     testRunner.And("The category should not exist in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");

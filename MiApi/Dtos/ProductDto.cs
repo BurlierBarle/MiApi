@@ -8,6 +8,5 @@ namespace MiApi.Dtos
         public string? Description { get; set; }
 
         public ICollection<int> CategoryIds { get; set; }
-        public ICollection<CategoryDto> Categories { get; set; }
     }
 }

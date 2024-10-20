@@ -6,6 +6,7 @@ using MiApi.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Runtime.Intrinsics.X86;
 
 namespace MiApi.Controllers
 {
@@ -34,16 +35,7 @@ namespace MiApi.Controllers
                 Id = p.Id,
                 Name = p.Name,
                 Description = p.Description,
-                Categories = p.ProductCategories.Select(pc => new CategoryDto
-                {
-                    Id = pc.Category.Id,
-                    Name = pc.Category.Name,
-                    Description = pc.Category.Description,
-                    ProductIds = _context.Products
-                        .Where(prod => prod.ProductCategories.Any(pC => pC.CategoryId == pc.Category.Id))
-                        .Select(prod => prod.Id)
-                        .ToList()
-                }).ToList()
+                CategoryIds = p.ProductCategories.Select(pc => pc.CategoryId).ToList() // Solo obtener IDs de categorías
             });
 
             return Ok(productDTOs);
@@ -66,16 +58,7 @@ namespace MiApi.Controllers
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
-                Categories = product.ProductCategories.Select(pc => new CategoryDto
-                {
-                    Id = pc.Category.Id,
-                    Name = pc.Category.Name,
-                    Description = pc.Category.Description,
-                    ProductIds = _context.Products
-                        .Where(prod => prod.ProductCategories.Any(pC => pC.CategoryId == pc.Category.Id))
-                        .Select(prod => prod.Id)
-                        .ToList()
-                }).ToList()
+                CategoryIds = product.ProductCategories.Select(pc => pc.CategoryId).ToList() // Solo obtener IDs de categorías
             };
 
             return Ok(productDTO);
@@ -83,12 +66,12 @@ namespace MiApi.Controllers
 
         // POST: api/v1/products
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> CreateProduct(ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] ProductDto productDto)
         {
             // Validar que el producto tenga al menos una categoría
             if (productDto.CategoryIds == null || !productDto.CategoryIds.Any())
             {
-                return BadRequest(new { Error = "El producto debe tener al menos una categoría." });
+                return BadRequest(new { Error = "The product needs a category." });
             }
 
             // Validar unicidad del nombre del producto por categoría
@@ -96,7 +79,7 @@ namespace MiApi.Controllers
             {
                 if (await _context.Products.AnyAsync(p => p.Name == productDto.Name && p.ProductCategories.Any(pc => pc.CategoryId == categoryId)))
                 {
-                    return UnprocessableEntity(new { Error = "The name is already in use." });
+                    return UnprocessableEntity(new { Error = "The name is already in use" });
                 }
             }
 
@@ -113,35 +96,22 @@ namespace MiApi.Controllers
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            // Obtener el DTO del producto creado para la respuesta
+            // Asignar el ID al DTO del producto creado para la respuesta
             productDto.Id = product.Id;
-            productDto.Categories = await _context.ProductCategories
-                .Include(pc => pc.Category)
-                .Where(pc => pc.ProductId == product.Id)
-                .Select(pc => new CategoryDto
-                {
-                    Id = pc.Category.Id,
-                    Name = pc.Category.Name,
-                    Description = pc.Category.Description,
-                    ProductIds = _context.Products
-                        .Where(prod => prod.ProductCategories.Any(pC => pC.CategoryId == pc.Category.Id))
-                        .Select(prod => prod.Id)
-                        .ToList()
-                }).ToListAsync();
 
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, productDto);
+            return CreatedAtAction(nameof(GetProduct), new { name = product.Name }, productDto);
         }
 
-        // PUT: api/v1/products/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, ProductDto productDto)
+        // PUT: api/v1/products/{name}
+        [HttpPut("{name}")]
+        public async Task<IActionResult> UpdateProduct(string name, [FromBody] ProductDto productDto)
         {
-            if (id != productDto.Id)
+            if (name != productDto.Name)
                 return BadRequest();
 
             var product = await _context.Products
                 .Include(p => p.ProductCategories)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Name == name);
 
             if (product == null)
                 return NotFound();
@@ -149,15 +119,15 @@ namespace MiApi.Controllers
             // Validar que el producto tenga al menos una categoría
             if (productDto.CategoryIds == null || !productDto.CategoryIds.Any())
             {
-                return BadRequest(new { Error = "El producto debe tener al menos una categoría." });
+                return BadRequest(new { Error = "The product needs a category." });
             }
 
             // Validar unicidad del nombre del producto por categoría
             foreach (var categoryId in productDto.CategoryIds)
             {
-                if (await _context.Products.AnyAsync(p => p.Name == productDto.Name && p.Id != id && p.ProductCategories.Any(pc => pc.CategoryId == categoryId)))
+                if (await _context.Products.AnyAsync(p => p.Name == productDto.Name && p.Name != name && p.ProductCategories.Any(pc => pc.CategoryId == categoryId)))
                 {
-                    return UnprocessableEntity(new { Error = $"El nombre del producto '{productDto.Name}' ya está en uso en la categoría con ID {categoryId}." });
+                    return UnprocessableEntity(new { Error = "The name is already in use" });
                 }
             }
 
@@ -177,13 +147,13 @@ namespace MiApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/v1/products/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        // DELETE: api/v1/products/{name}
+        [HttpDelete("{name}")]
+        public async Task<IActionResult> DeleteProduct(string name)
         {
             var product = await _context.Products
                 .Include(p => p.ProductCategories)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Name == name);
 
             if (product == null)
                 return NotFound();
