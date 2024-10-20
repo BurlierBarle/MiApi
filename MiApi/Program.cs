@@ -17,8 +17,12 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         // Configure the database connection (using SQL Server in this example)
+        var connectionString = builder.Configuration.GetConnectionString("Connection");
+
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("Connection")));
+            options.UseSqlServer(connectionString));
+
+
 
         // Configure CORS (if needed)
         builder.Services.AddCors(options =>
