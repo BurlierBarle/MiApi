@@ -1,11 +1,9 @@
-﻿using Microsoft.VisualStudio.TestPlatform.TestHost;
+﻿using FluentAssertions;
+using MiApi.Dtos;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Net.Http.Json;
 using TechTalk.SpecFlow;
-using MiApi;
-using MiApi.Dtos;
-using FluentAssertions;
-using Xunit;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace MiApi.Test.Steps
 {
