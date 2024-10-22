@@ -6,6 +6,6 @@ namespace MiApi.Dtos
         public int Id { get; set; }
         public required string Name { get; set; }
         public string? Description { get; set; }
-        public ICollection<int> CategoryIds { get; set; }
+        public ICollection<int> CategoryIds { get; set; } = new List<int>();
     }
 }

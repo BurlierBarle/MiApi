@@ -133,10 +133,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 10
-    testRunner.Given("I have data to view a category with name \"Soda\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to view a category with name \"Controller\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 11
-    testRunner.When("I send a GET request to \"/api/v1/categories/Soda\" with the category data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a GET request to \"/api/v1/categories/Controller\" with the category data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 12
     testRunner.Then("the response status should be 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -201,7 +201,7 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 22
-    testRunner.Given("I have data to create a category with name \"Pets\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to create a category with name \"Pets\" but is taken", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 23
     testRunner.When("I send a POST request to \"/api/v1/categories\" with the category data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
@@ -304,16 +304,16 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 40
-    testRunner.Given("I have data to delete a category with name \"Phones\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to delete a category with name \"Offices\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 41
-    testRunner.When("I send a DELETE to \"/api/v1/categories/Phones\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a DELETE to \"/api/v1/categories/Offices\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 42
     testRunner.Then("the response status should be 204", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
 #line 43
-    testRunner.And("The category \"Phones\" should not exist in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+    testRunner.And("The category \"Offices\" should not exist in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             }
             this.ScenarioCleanup();

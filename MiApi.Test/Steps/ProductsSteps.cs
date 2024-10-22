@@ -10,6 +10,7 @@ using TechTalk.SpecFlow;
 using MiApi.Models;
 using Newtonsoft.Json;
 using System.Net;
+using System;
 
 namespace MiApi.Test.Steps
 {
@@ -40,52 +41,256 @@ namespace MiApi.Test.Steps
 
             if (products == null || !products.Any())
             {
-                var categoryToAdd = new ProductDto
+                var categoryDto = new CategoryDto
                 {
-                    Name = "Default Product",
-                    Description = "This is a sample product.",
-                    CategoryIds = []
+                    Name = "Default Product Category",
+                    Description = "Sample description",
+                    ProductIds = new List<int>()
                 };
 
-                _response = await _client.PostAsJsonAsync("/api/v1/products", categoryToAdd);
+                _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+                _response.EnsureSuccessStatusCode();
+
+                _response = await _client.GetAsync($"/api/v1/categories/Default Product Category");
+
+                var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+                var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+                var categoryId = createdCategory.Id;
+
+                var productDto = new ProductDto
+                {
+                    Name = "Default Product",
+                    Description = "Sample description",
+                    CategoryIds = new List<int> { categoryId }
+                };
+
+                await _client.PostAsJsonAsync("/api/v1/products", productDto);
 
                 _response.EnsureSuccessStatusCode();
             }
         }
 
         [Given(@"I have data to view a product with name ""(.*)""")]
-        public void GivenIHaveDataToViewAProductWithName(string name)
+        public async Task GivenIHaveDataToViewAProductWithName(string name)
         {
+            _response = await _client.GetAsync($"/api/v1/products/{name}");
+
+            if (_response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _response = await _client.GetAsync("/api/v1/categories/Books");
+
+                var categoryDto = new CategoryDto
+                {
+                    Name = "Books",
+                    Description = "Sample description",
+                    ProductIds = []
+                };
+
+                _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+                _response.EnsureSuccessStatusCode();
+
+                _response = await _client.GetAsync("/api/v1/categories/Books");
+                var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+                var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+                var categoryId = createdCategory.Id;
+
+                var productDto = new ProductDto
+                {
+                    Name = name,
+                    Description = "Sample description",
+                    CategoryIds = new List<int> { categoryId }
+                };
+
+                await _client.PostAsJsonAsync("/api/v1/products", productDto);
+
+            }
+
             _productDto = new ProductDto
             {
                 Name = name
             };
         }
 
-        [Given(@"I have data to create a product with name ""(.*)"" in the category id ""(.*)""")]
-        public void GivenIHaveDataToCreateAProductWithNameInTheCategoryId(string productName, int categoryId)
+        [Given(@"I have data to create a product with name ""(.*)"" in the category ""(.*)""")]
+        public async Task GivenIHaveDataToCreateAProductWithNameInTheCategoryId(string name, string categoryName)
         {
+            _response = await _client.GetAsync($"/api/v1/categories/{categoryName}");
+
+            if (_response.StatusCode == HttpStatusCode.NotFound)
+            {
+                var categoryDto = new CategoryDto
+                {
+                    Name = categoryName,
+                    Description = "Sample description",
+                    ProductIds = []
+                };
+
+                _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+                _response.EnsureSuccessStatusCode();
+
+                _response = await _client.GetAsync($"/api/v1/categories/{categoryName}");
+
+                var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+                var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+                var categoryId = createdCategory.Id;
+
+                var productDto = new ProductDto
+                {
+                    Name = name,
+                    Description = "Sample description",
+                    CategoryIds = new List<int> { categoryId }
+                };
+
+                await _client.PostAsJsonAsync("/api/v1/products", productDto);
+
+                _response.EnsureSuccessStatusCode();
+            }
+
+            _response = await _client.GetAsync($"/api/v1/products/{name}");
+
+            if (_response.StatusCode != HttpStatusCode.NotFound)
+            {
+                _response = await _client.DeleteAsync($"/api/v1/products/{name}");
+                _response.EnsureSuccessStatusCode();
+            }
+
+            _response = await _client.GetAsync($"/api/v1/categories/{categoryName}");
+            var createdCategoryProductContent = await _response.Content.ReadAsStringAsync();
+            var createdCategoryProduct = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryProductContent);
+            var categoryproductId = createdCategoryProduct.Id;
+
             _productDto = new ProductDto
             {
-                Name = productName,
+                Name = name,
                 Description = "Sample description",
-                CategoryIds = [categoryId]
+                CategoryIds = [categoryproductId]
             };
+
+            _response.EnsureSuccessStatusCode();
+        }
+
+        [Given(@"I have data to create a product with name ""(.*)"" is taken in the category ""(.*)""")]
+        public async Task GivenIHaveDataToCreateAProductWithNameIsTakenInTheCategoryId(string name, string categoryName)
+        {
+            _response = await _client.GetAsync($"/api/v1/products/{name}");
+
+            if (_response.StatusCode == HttpStatusCode.NotFound)
+            {
+                var categoryDto = new CategoryDto
+                {
+                    Name = categoryName,
+                    Description = "Sample description",
+                    ProductIds = []
+                };
+
+                _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+                _response.EnsureSuccessStatusCode();
+
+                _response = await _client.GetAsync($"/api/v1/categories/{categoryName}");
+
+                var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+                var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+                var categoryId = createdCategory.Id;
+
+                var productDto = new ProductDto
+                {
+                    Name = name,
+                    Description = "Sample description",
+                    CategoryIds = new List<int> { categoryId }
+                };
+
+                await _client.PostAsJsonAsync("/api/v1/products", productDto);
+
+                _response.EnsureSuccessStatusCode();
+            }
+
+            _response = await _client.GetAsync($"/api/v1/categories/{categoryName}");
+            var createdCategoryProductContent = await _response.Content.ReadAsStringAsync();
+            var createdCategoryProduct = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryProductContent);
+            var categoryproductId = createdCategoryProduct.Id;
+
+            _productDto = new ProductDto
+            {
+                Name = name,
+                Description = "Sample description",
+                CategoryIds = [categoryproductId]
+            };
+
+            _response.EnsureSuccessStatusCode();
         }
 
         [Given(@"I have data to delete a product with name ""(.*)""")]
-        public void GivenIHaveDataToDeleteAProductWithName(string name)
+        public async Task GivenIHaveDataToDeleteAProductWithName(string name)
         {
-            var productDto = new ProductDto
+            _response = await _client.GetAsync($"/api/v1/products/{name}");
+
+            if (_response.StatusCode == HttpStatusCode.NotFound)
+            {
+                
+                _response = await _client.GetAsync($"/api/v1/categories/Pets");
+
+                var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+                var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+                var categoryId = createdCategory.Id;
+
+                var productDto = new ProductDto
+                {
+                    Name = name,
+                    Description = "Sample description",
+                    CategoryIds = new List<int> { categoryId }
+                };
+
+                await _client.PostAsJsonAsync("/api/v1/products", productDto);
+
+                _response.EnsureSuccessStatusCode();
+            }
+
+            _productDto = new ProductDto
             {
                 Name = name
             };
         }
 
         [Given(@"I have data to edit a product with name ""(.*)""")]
-        public void GivenIHaveDataToEditAProductWithName(string name)
+        public async Task GivenIHaveDataToEditAProductWithName(string name)
         {
-            var productDto = new ProductDto
+            _response = await _client.GetAsync($"/api/v1/products/{name}");
+
+            if (_response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _response = await _client.GetAsync("/api/v1/categories/Consoles");
+
+                if (_response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    var categoryDto = new CategoryDto
+                    {
+                        Name = "Consoles",
+                        Description = "Sample description",
+                        ProductIds = []
+                    };
+
+                    _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+                    _response.EnsureSuccessStatusCode();
+                }
+
+                _response = await _client.GetAsync("/api/v1/categories/Consoles");
+                var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+                var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+                var categoryId = createdCategory.Id;
+
+                var productDto = new ProductDto
+                {
+                    Name = name,
+                    Description = "Sample description",
+                    CategoryIds = new List<int> { categoryId }
+                };
+
+                await _client.PostAsJsonAsync("/api/v1/products", productDto);
+
+                _response.EnsureSuccessStatusCode();
+            }
+
+            _productDto = new ProductDto
             {
                 Name = name
             };
@@ -130,11 +335,16 @@ namespace MiApi.Test.Steps
         [When(@"I send a PUT product to ""(.*)"" with the name ""(.*)"" and the description ""(.*)""")]
         public async Task WhenISendAPutProductToWithTheNameAndDescription(string url, string name, string description)
         {
+            _response = await _client.GetAsync("/api/v1/categories/Consoles");
+            var createdCategoryContent = await _response.Content.ReadAsStringAsync();
+            var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
+            var categoryId = createdCategory.Id;
+
             var updatedProduct = new ProductDto
             {
                 Name = name,
                 Description = description,
-                CategoryIds = [6]
+                CategoryIds = [categoryId]
             };
 
             _response = await _client.PutAsJsonAsync(url, updatedProduct);
@@ -212,7 +422,7 @@ namespace MiApi.Test.Steps
             var updatedProduct = products.FirstOrDefault(c => c.Name == name);
 
             updatedProduct.Should().NotBeNull();
-            updatedProduct.Description.Should().Be("Lenovo Computer");
+            updatedProduct.Description.Should().Be("Xbox One");
         }
 
         [Then(@"The product ""(.*)"" should not exist in the database")]

@@ -136,10 +136,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 11
-    testRunner.Given("I have data to view a product with name \"Alienware\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to view a product with name \"Robots\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 12
-    testRunner.When("I send a GET request to \"/api/v1/products/Alienware\" with the products data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a GET request to \"/api/v1/products/Robots\" with the products data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 13
     testRunner.Then("The response status should be 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -173,7 +173,7 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 18
-    testRunner.Given("I have data to create a product with name \"Asus\" in the category id \"6\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to create a product with name \"Avengers\" in the category \"Movies\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 19
     testRunner.When("I send a POST request to \"/api/v1/products\" with the product data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
@@ -207,7 +207,8 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 24
-    testRunner.Given("I have data to create a product with name \"Alienware\" in the category id \"6\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to create a product with name \"Hamburger\" is taken in the category \"F" +
+                        "ast Food\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 25
     testRunner.When("I send a POST request to \"/api/v1/products\" with the product data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
@@ -241,17 +242,17 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 30
-    testRunner.Given("I have data to edit a product with name \"Lenovo\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to edit a product with name \"Xbox\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 31
-    testRunner.When("I send a PUT product to \"/api/v1/products/Lenovo\" with the name \"Lenovo\" and the " +
-                        "description \"Lenovo Computer\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a PUT product to \"/api/v1/products/Xbox\" with the name \"Xbox\" and the desc" +
+                        "ription \"Xbox One\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 32
     testRunner.Then("The response status should be 204", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
 #line 33
-    testRunner.And("The response should have updated the product \"Lenovo\" in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+    testRunner.And("The response should have updated the product \"Xbox\" in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -276,10 +277,10 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 36
-    testRunner.Given("I have data to edit a product with name \"Lenovo\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to edit a product with name \"Robots\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 37
-    testRunner.When("I send a PUT product to \"/api/v1/products/Lenovo\" with empty name", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a PUT product to \"/api/v1/products/Robots\" with empty name", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 38
     testRunner.Then("The response status should be 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
@@ -310,16 +311,16 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 42
-    testRunner.Given("I have data to delete a product with name \"Asus\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.Given("I have data to delete a product with name \"Dog\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 43
-    testRunner.When("I send a DELETE product to \"/api/v1/products/Asus\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I send a DELETE product to \"/api/v1/products/Dog\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 44
     testRunner.Then("The response status should be 204", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
 #line 45
-    testRunner.And("The product \"Asus\" should not exist in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+    testRunner.And("The product \"Dell\" should not exist in the database", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             }
             this.ScenarioCleanup();

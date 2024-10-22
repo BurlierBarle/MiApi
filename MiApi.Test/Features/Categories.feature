@@ -7,8 +7,8 @@ Scenario: User can view the list of categories
     And the response should contain a list of categories
 
 Scenario: User can view each of categories
-    Given I have data to view a category with name "Soda"
-    When I send a GET request to "/api/v1/categories/Soda" with the category data
+    Given I have data to view a category with name "Controller"
+    When I send a GET request to "/api/v1/categories/Controller" with the category data
     Then the response status should be 200
     And the response should contain a category 
 
@@ -19,7 +19,7 @@ Scenario: User can create a category
     And the category should be created in the database
 
 Scenario: User tries to create a category but the name is already taken
-    Given I have data to create a category with name "Pets"
+    Given I have data to create a category with name "Pets" but is taken
     When I send a POST request to "/api/v1/categories" with the category data
     Then the response status should be 422
     And the response should get an error message that the name is already in use
@@ -37,10 +37,10 @@ Scenario: User tries to edit category with empty name
     And The response should get an error message that the name field is required
 
 Scenario: User can destroy a category
-    Given I have data to delete a category with name "Phones"
-    When I send a DELETE to "/api/v1/categories/Phones"
+    Given I have data to delete a category with name "Offices"
+    When I send a DELETE to "/api/v1/categories/Offices"
     Then the response status should be 204
-    And The category "Phones" should not exist in the database
+    And The category "Offices" should not exist in the database
 
 Scenario: User tries to destroy a category but it has products assigned
     Given I have a category with name "Computers" that has products
