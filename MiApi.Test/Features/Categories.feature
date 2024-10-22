@@ -28,7 +28,7 @@ Scenario: User can edit category
     Given I have data to edit a category with name "Soda"
     When I send a PUT to "/api/v1/categories/Soda" with the name "Soda" and the description "Soda Free"
     Then the response status should be 204
-    And The response should have updated the category in the database
+    And The response should have updated the category "Soda" in the database
 
 Scenario: User tries to edit category with empty name
     Given I have data to edit a category with name "Soda"
@@ -40,7 +40,7 @@ Scenario: User can destroy a category
     Given I have data to delete a category with name "Phones"
     When I send a DELETE to "/api/v1/categories/Phones"
     Then the response status should be 204
-    And The category should not exist in the database
+    And The category "Phones" should not exist in the database
 
 Scenario: User tries to destroy a category but it has products assigned
     Given I have a category with name "Computers" that has products
@@ -53,4 +53,4 @@ Scenario: User deletes products and then deletes the category
     And I delete all products from the category name "Fruit"
     When I send a DELETE to "/api/v1/categories/Fruit"
     Then the response status should be 204
-    And The category should not exist in the database
+    And The category "Fruit" should not exist in the database

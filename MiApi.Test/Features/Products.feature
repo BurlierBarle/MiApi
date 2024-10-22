@@ -30,7 +30,7 @@ Scenario: User can edit product
     Given I have data to edit a product with name "Lenovo"
     When I send a PUT product to "/api/v1/products/Lenovo" with the name "Lenovo" and the description "Lenovo Computer"
     Then The response status should be 204
-    And The response should have updated the product in the database
+    And The response should have updated the product "Lenovo" in the database
 
 Scenario: User tries to edit product with empty name
     Given I have data to edit a product with name "Lenovo"
@@ -42,5 +42,5 @@ Scenario: User can destroy a product
     Given I have data to delete a product with name "Asus"
     When I send a DELETE product to "/api/v1/products/Asus"
     Then The response status should be 204
-    And The product should not exist in the database
+    And The product "Asus" should not exist in the database
     

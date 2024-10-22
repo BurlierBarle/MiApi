@@ -9,6 +9,7 @@ using System.Net.Http.Json;
 using TechTalk.SpecFlow;
 using MiApi.Models;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace MiApi.Test.Steps
 {
@@ -31,7 +32,27 @@ namespace MiApi.Test.Steps
         [Given(@"the database has categories")]
         public async Task GivenTheDatabaseHasCategories()
         {
-            // Seed the database with categories if necessary
+            _response = await _client.GetAsync("/api/v1/categories");
+
+            _response.EnsureSuccessStatusCode();
+
+            var jsonString = await _response.Content.ReadAsStringAsync();
+
+            var categories = JsonConvert.DeserializeObject<List<CategoryDto>>(jsonString);
+
+            if (categories == null || !categories.Any())
+            {
+                var categoryToAdd = new CategoryDto
+                {
+                    Name = "Default Category",
+                    Description = "This is a sample category.",
+                    ProductIds = []
+                };
+
+                _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryToAdd);
+
+                _response.EnsureSuccessStatusCode();
+            }
         }
 
 
@@ -87,7 +108,6 @@ namespace MiApi.Test.Steps
         [Given(@"I have a category with name ""(.*)"" that has products to delete")]
         public async Task GivenIHaveCategoryWithNameThatHasProductsToDelete(string name)
         {
-            // Crea la categoría si no existe
             var categoryDto = new CategoryDto
             {
                 Name = name,
@@ -95,20 +115,18 @@ namespace MiApi.Test.Steps
                 ProductIds = []
             };
 
-            var postResponse = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
-            postResponse.EnsureSuccessStatusCode();
+            _response = await _client.PostAsJsonAsync("/api/v1/categories", categoryDto);
+            _response.EnsureSuccessStatusCode();
 
-            // Obtén el ID de la categoría recién creada
-            var createdCategoryContent = await postResponse.Content.ReadAsStringAsync();
+            var createdCategoryContent = await _response.Content.ReadAsStringAsync();
             var createdCategory = JsonConvert.DeserializeObject<CategoryDto>(createdCategoryContent);
-            _categoryId = createdCategory.Id; // Guarda el ID de la categoría
+            _categoryId = createdCategory.Id; 
 
-            // Crea un producto asociado a la categoría
             var productDto = new ProductDto
             {
                 Name = "Apple",
                 Description = "A juicy fruit",
-                CategoryIds = new List<int> { _categoryId } // Usa el ID de la categoría recién creada
+                CategoryIds = new List<int> { _categoryId } 
             };
 
             await _client.PostAsJsonAsync("/api/v1/products", productDto);
@@ -121,26 +139,22 @@ namespace MiApi.Test.Steps
             var categoriesResponse = await _client.GetAsync("/api/v1/categories");
             var categories = JsonConvert.DeserializeObject<List<CategoryDto>>(await categoriesResponse.Content.ReadAsStringAsync());
 
-            // Buscar la categoría por nombre y obtener su ID
             var category = categories.FirstOrDefault(c => c.Name == categoryName);
 
-            // Si la categoría no se encuentra, no hay nada que eliminar
             if (category == null)
             {
                 throw new Exception($"Category not founded");
             }
 
-            // Obtener la lista de productos
             var productsResponse = await _client.GetAsync("/api/v1/products");
             var productList = JsonConvert.DeserializeObject<List<ProductDto>>(await productsResponse.Content.ReadAsStringAsync());
 
-            // Eliminar productos que pertenecen a la categoría encontrada
             foreach (var product in productList)
             {
                 if (product.CategoryIds.Contains(category.Id))
                 {
-                    var deleteResponse = await _client.DeleteAsync($"/api/v1/products/{product.Name}"); // Cambia a usar nombre
-                    deleteResponse.EnsureSuccessStatusCode(); // Asegúrate de que la eliminación fue exitosa
+                    var deleteResponse = await _client.DeleteAsync($"/api/v1/products/{product.Name}"); 
+                    deleteResponse.EnsureSuccessStatusCode(); 
                 }
             }
         }
@@ -191,7 +205,6 @@ namespace MiApi.Test.Steps
         [When(@"I send a DELETE to ""(.*)""")]
         public async Task WhenISendADeleteTo(string url)
         {
-            // Enviar la petición DELETE
             _response = await _client.DeleteAsync(url);
         }
 
@@ -216,15 +229,35 @@ namespace MiApi.Test.Steps
         }
 
         [Then(@"the category should be created in the database")]
-        public void ThenTheCategoryShouldBeCreatedInTheDatabase()
+        public async Task ThenTheCategoryShouldBeCreatedInTheDatabase()
         {
-            // Verify that the category exists in the database
+            _response = await _client.GetAsync("/api/v1/categories");
+
+            _response.EnsureSuccessStatusCode();
+
+            var jsonString = await _response.Content.ReadAsStringAsync();
+
+            var categories = JsonConvert.DeserializeObject<List<CategoryDto>>(jsonString);
+
+            var createdCategory = categories.FirstOrDefault(c => c.Name == _categoryDto.Name);
+
+            createdCategory.Should().NotBeNull("Expected category to be created, but it was not found in the database.");
         }
 
-        [Then(@"The response should have updated the category in the database")]
-        public void ThenResponseShouldUpdatedInTheDataBase()
+        [Then(@"The response should have updated the category ""(.*)"" in the database")]
+        public async Task ThenResponseShouldUpdatedInTheDataBase(string name)
         {
-            // Verify that the category exists in the database
+            _response = await _client.GetAsync($"/api/v1/categories?name={name}");
+
+            _response.EnsureSuccessStatusCode();
+
+            var jsonString = await _response.Content.ReadAsStringAsync();
+            var categories = JsonConvert.DeserializeObject<List<CategoryDto>>(jsonString);
+
+            var updatedCategory = categories.FirstOrDefault(c => c.Name == name);
+
+            updatedCategory.Should().NotBeNull();
+            updatedCategory.Description.Should().Be("Soda Free"); 
         }
 
         [Then(@"the response should get an error message that the name is already in use")]
@@ -241,10 +274,12 @@ namespace MiApi.Test.Steps
             content.Should().Contain("The Name field is required.");
         }
 
-        [Then(@"The category should not exist in the database")]
-        public void ThenTheCategoryShouldNotExistInTheDatabase()
+        [Then(@"The category ""(.*)"" should not exist in the database")]
+        public async Task ThenTheCategoryShouldNotExistInTheDatabase(string name)
         {
-            // Verify that the category does not exist in the database
+            _response = await _client.GetAsync($"/api/v1/categories/{name}");
+
+            _response.StatusCode.Should().Be(HttpStatusCode.NotFound, "Category should not exist");
         }
 
         [Then(@"The response should get an error message that cannot delete category with assigned products.")]

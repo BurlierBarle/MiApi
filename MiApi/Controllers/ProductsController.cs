@@ -35,7 +35,7 @@ namespace MiApi.Controllers
                 Id = p.Id,
                 Name = p.Name,
                 Description = p.Description,
-                CategoryIds = p.ProductCategories.Select(pc => pc.CategoryId).ToList() // Solo obtener IDs de categorías
+                CategoryIds = p.ProductCategories.Select(pc => pc.CategoryId).ToList() 
             });
 
             return Ok(productDTOs);
@@ -58,7 +58,7 @@ namespace MiApi.Controllers
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
-                CategoryIds = product.ProductCategories.Select(pc => pc.CategoryId).ToList() // Solo obtener IDs de categorías
+                CategoryIds = product.ProductCategories.Select(pc => pc.CategoryId).ToList() 
             };
 
             return Ok(productDTO);
@@ -68,13 +68,11 @@ namespace MiApi.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] ProductDto productDto)
         {
-            // Validar que el producto tenga al menos una categoría
             if (productDto.CategoryIds == null || !productDto.CategoryIds.Any())
             {
                 return BadRequest(new { Error = "The product needs a category." });
             }
 
-            // Validar unicidad del nombre del producto por categoría
             foreach (var categoryId in productDto.CategoryIds)
             {
                 if (await _context.Products.AnyAsync(p => p.Name == productDto.Name && p.ProductCategories.Any(pc => pc.CategoryId == categoryId)))
@@ -96,7 +94,6 @@ namespace MiApi.Controllers
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            // Asignar el ID al DTO del producto creado para la respuesta
             productDto.Id = product.Id;
 
             return CreatedAtAction(nameof(GetProduct), new { name = product.Name }, productDto);
@@ -116,13 +113,11 @@ namespace MiApi.Controllers
             if (product == null)
                 return NotFound();
 
-            // Validar que el producto tenga al menos una categoría
             if (productDto.CategoryIds == null || !productDto.CategoryIds.Any())
             {
                 return BadRequest(new { Error = "The product needs a category." });
             }
 
-            // Validar unicidad del nombre del producto por categoría
             foreach (var categoryId in productDto.CategoryIds)
             {
                 if (await _context.Products.AnyAsync(p => p.Name == productDto.Name && p.Name != name && p.ProductCategories.Any(pc => pc.CategoryId == categoryId)))
@@ -134,7 +129,6 @@ namespace MiApi.Controllers
             product.Name = productDto.Name;
             product.Description = productDto.Description;
 
-            // Limpiar categorías existentes y agregar las nuevas
             product.ProductCategories.Clear();
             product.ProductCategories = productDto.CategoryIds.Select(id => new ProductCategory
             {

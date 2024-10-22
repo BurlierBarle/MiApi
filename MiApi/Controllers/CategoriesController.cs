@@ -64,7 +64,6 @@ namespace MiApi.Controllers
         [HttpPost]
         public async Task<ActionResult<CategoryDto>> CreateCategory(CategoryDto categoryDto)
         {
-            // Validate uniqueness of Name
             if (await _context.Categories.AnyAsync(c => c.Name == categoryDto.Name))
             {
                 return UnprocessableEntity(new { Error = "The name is already in use." });
@@ -88,33 +87,26 @@ namespace MiApi.Controllers
         [HttpPut("{name}")]
         public async Task<IActionResult> UpdateCategoryByName(string name, CategoryDto categoryDto)
         {
-            // Verificar si el nombre en la URL es diferente al nombre en el DTO
             if (name != categoryDto.Name)
                 return BadRequest(new { Error = "The name in the URL and the request body must match." });
 
-            // Buscar la categoría por nombre
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == name);
 
-            // Verificar si la categoría existe
             if (category == null)
                 return NotFound(new { Error = "Category not found." });
 
-            // Validar si el nuevo nombre ya está en uso por otra categoría
             if (await _context.Categories.AnyAsync(c => c.Name == categoryDto.Name && c.Id != category.Id))
             {
                 return UnprocessableEntity(new { Error = "The name is already in use." });
             }
 
-            // Actualizar los datos de la categoría
             category.Name = categoryDto.Name;
             category.Description = categoryDto.Description;
 
             _context.Entry(category).State = EntityState.Modified;
 
-            // Guardar cambios en la base de datos
             await _context.SaveChangesAsync();
 
-            // Devolver respuesta sin contenido (204)
             return NoContent();
         }
 

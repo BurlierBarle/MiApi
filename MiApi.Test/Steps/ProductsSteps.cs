@@ -9,6 +9,7 @@ using System.Net.Http.Json;
 using TechTalk.SpecFlow;
 using MiApi.Models;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace MiApi.Test.Steps
 {
@@ -29,7 +30,27 @@ namespace MiApi.Test.Steps
         [Given(@"the database has products")]
         public async Task GivenTheDatabaseHasProducts()
         {
-            // Seed the database with products if necessary
+            _response = await _client.GetAsync("/api/v1/products");
+
+            _response.EnsureSuccessStatusCode();
+
+            var jsonString = await _response.Content.ReadAsStringAsync();
+
+            var products = JsonConvert.DeserializeObject<List<ProductDto>>(jsonString);
+
+            if (products == null || !products.Any())
+            {
+                var categoryToAdd = new ProductDto
+                {
+                    Name = "Default Product",
+                    Description = "This is a sample product.",
+                    CategoryIds = []
+                };
+
+                _response = await _client.PostAsJsonAsync("/api/v1/products", categoryToAdd);
+
+                _response.EnsureSuccessStatusCode();
+            }
         }
 
         [Given(@"I have data to view a product with name ""(.*)""")]
@@ -156,9 +177,19 @@ namespace MiApi.Test.Steps
         }
 
         [Then(@"the product should be created in the database")]
-        public void ThenTheProductShouldBeCreatedInTheDatabase()
+        public async Task ThenTheProductShouldBeCreatedInTheDatabase()
         {
-            // Verify that the product does not exist in the database
+            _response = await _client.GetAsync("/api/v1/products");
+
+            _response.EnsureSuccessStatusCode();
+
+            var jsonString = await _response.Content.ReadAsStringAsync();
+
+            var products = JsonConvert.DeserializeObject<List<CategoryDto>>(jsonString);
+
+            var createdProducts = products.FirstOrDefault(c => c.Name == _productDto.Name);
+
+            createdProducts.Should().NotBeNull("Expected products to be created, but it was not found in the database.");
         }
 
         [Then(@"The response should get an error message that the name is already in use")]
@@ -168,16 +199,28 @@ namespace MiApi.Test.Steps
             content.Should().Contain("The name is already in use");
         }
 
-        [Then(@"The response should have updated the product in the database")]
-        public void ThenResponseShouldProductUpdatedInTheDataBase()
+        [Then(@"The response should have updated the product ""(.*)"" in the database")]
+        public async Task ThenResponseShouldProductUpdatedInTheDataBase(string name)
         {
-            // Verify that the product exists in the database
+            _response = await _client.GetAsync($"/api/v1/products?name={name}");
+
+            _response.EnsureSuccessStatusCode();
+
+            var jsonString = await _response.Content.ReadAsStringAsync();
+            var products = JsonConvert.DeserializeObject<List<ProductDto>>(jsonString);
+
+            var updatedProduct = products.FirstOrDefault(c => c.Name == name);
+
+            updatedProduct.Should().NotBeNull();
+            updatedProduct.Description.Should().Be("Lenovo Computer");
         }
 
-        [Then(@"The product should not exist in the database")]
-        public void ThenTheProductShouldNotExistInTheDatabase()
+        [Then(@"The product ""(.*)"" should not exist in the database")]
+        public async Task ThenTheProductShouldNotExistInTheDatabase(string name)
         {
-            // Verify that the product does not exist in the database
+            _response = await _client.GetAsync($"/api/v1/product/{name}");
+
+            _response.StatusCode.Should().Be(HttpStatusCode.NotFound, "Product should not exist");
         }
 
         [Then(@"The response should get an error message that the name product field is required")]
